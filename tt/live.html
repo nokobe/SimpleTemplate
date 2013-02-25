@@ -1,0 +1,28 @@
+<h1>$title$</h1>
+
+<p>Hello, $name$</p>
+
+A list of fruits:
+<ul>
+$fruit:{f|	<li>$f$</li>
+}$
+</ul>
+
+A list of fruits <b>bolded</b>:
+<ul>
+$fruit:{f|	<li><b>$f$</b></li>
+}$
+</ul>
+
+A list of fruits <i>italised</i>:
+<ul>
+$fruit:{f|	<li><i>$f$</i></li>
+}$
+</ul>
+
+$if(justapples)$
+A list of apples:
+<ul>
+$justapples:{a|<li>$a$</li>}$
+</ul>
+$endif$

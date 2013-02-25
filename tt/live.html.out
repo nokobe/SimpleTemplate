@@ -1,0 +1,27 @@
+<h1>The Title</h1>
+
+<p>Hello, Mark</p>
+
+A list of fruits:
+<ul>
+	<li>apple</li>
+	<li>orange</li>
+	<li>banana</li>
+
+</ul>
+
+A list of fruits <b>bolded</b>:
+<ul>
+	<li><b>apple</b></li>
+	<li><b>orange</b></li>
+	<li><b>banana</b></li>
+
+</ul>
+
+A list of fruits <i>italised</i>:
+<ul>
+	<li><i>apple</i></li>
+	<li><i>orange</i></li>
+	<li><i>banana</i></li>
+
+</ul>
