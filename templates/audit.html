@@ -1,0 +1,43 @@
+$header()$
+<h1>$title$</h1>
+
+$dropdown(list)$
+
+<p>Hello, $name$</p>
+
+A list of fruits:
+<ul>
+$fruit:{f|	<li>$f$</li>
+}$
+</ul>
+
+A list of fruits <b>bolded</b>:
+<ul>
+$fruit:{f|	<li><b>$f$</b></li>
+}$
+</ul>
+
+A list of fruits <i>italised</i>:
+<ul>
+$fruit:{f|	<li><i>$f$</i></li>
+}$
+</ul>
+
+A list of apples:
+<ul>
+$justapplies:{a|<li>$a$</li>}$
+</ul>
+$object:{o|<li>$o$->head, $o$->tail</li>}$
+
+<h2>How about a table?</h2>
+
+<table class="table">
+<tr>
+$table_head:{h|<th>$h$</th>}$
+</tr>
+<tr>
+$table_row:{r|<td>$r$</td>}$
+<tr>
+</table>
+
+$footer(version)$
