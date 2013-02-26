@@ -1,0 +1,19 @@
+version 0.3
+- $var:template(alias)$
+- $var:template()$
+
+commit 6c0f40516a1425ca120184843a44f61e984127d4
+Author: Mark Bates <thebatesboy@gmail.com>
+Date:   Tue Feb 26 02:55:34 2013 +1100
+
+    version 0.2
+    - var substituion: $var$
+    - template inclusion: $template()$
+    - live templates: $var:{alias|text}$
+    - conditional: $if(cond)$, $else$, $endif$
+
+commit 43fff4fc09f75d4c9d6678ec284f4b41d10e8f1d
+Author: Mark Bates <thebatesboy@gmail.com>
+Date:   Mon Feb 25 21:52:31 2013 +1100
+
+    initial commit

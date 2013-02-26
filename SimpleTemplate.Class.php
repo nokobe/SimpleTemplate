@@ -3,7 +3,7 @@
 class SimpleTemplate {
 	protected $page;
 	protected $attr;
-	public $version = "0.2";
+	public $version = "0.3";
 
 	function SimpleTemplate($file) {
 		$this->getTemplate($file);
@@ -66,10 +66,10 @@ class SimpleTemplate {
 		return $this->template(file_get_contents("$this->templateDir/$name.$this->suffix"));
 	}
 
-	function parseLIVETEMPLATE($string) {
+	function parseLIVE($string) {
 		debug("checking : [[[ $string ]]]");
 		if (! preg_match('/\$([^: ]+):{([^|]+)\|([^}]+)}\$/', $string, $matches)) {
-			die("parseLIVETEMPLATE.1 failed");
+			die("parseLIVE.1 failed");
 		}
 		$var = $matches[1];
 		$alias = $matches[2];
@@ -81,13 +81,38 @@ class SimpleTemplate {
 		if (is_array($this->attr[$var])) {
 			$r = '';
 			foreach ($this->attr[$var] as $attr) {
-				$r .= str_replace("\$$alias\$", $attr, $text);
+				if (is_array($attr)) {
+					$templ = $text;
+					foreach ($attr as $subkey => $subvalue) {
+						$templ = str_replace("\$$alias"."[$subkey]\$", $subvalue, $templ);
+					}
+					$r .= $templ;
+				} else {
+					$r .= str_replace("\$$alias\$", $attr, $text, $count);
+					if ($count == 0) {
+						die("Iterating over \"$var\", couldn't find \$$alias\$ in template text: $text\n");
+					}
+				}
 			}
 			return $r;
 		}
 		else {
 			die("$var is not an array!\n");
 		}
+	}
+
+	function parseMAP($string) {
+		debug("checking : [[[ $string ]]]");
+		if (! preg_match('/\$([a-zA-Z0-9-_]+):([a-zA-Z0-9-_]+)\(([^)]*)\)\$/', $string, $matches)) {
+			die("parseMAP.1 failed");
+		}
+		$var = $matches[1];
+		$template = $matches[2];
+		$alias = $matches[3] == "" ? 'attr' : "$matches[3]";
+		debug("var = $var\ntemplate = $template\nalias = $alias");
+#		$text = trim(file_get_contents("$this->templateDir/$template.$this->suffix"), "\n");
+		$text = file_get_contents("$this->templateDir/$template.$this->suffix");
+		return $this->parseLIVE("\$$var:".'{'."$alias|$text".'}'."\$");
 	}
 
 	function parseVAR($string) {
@@ -116,15 +141,18 @@ class SimpleTemplate {
 				$string = str_replace($found, $this->parseTEMPLATE($found), $string);
 			}
 		}
-		debugOn();
 		if (preg_match_all('/\$[a-zA-Z0-9-_]+:{[^}]+}\$/', $string, $matches) > 0) {
 			foreach ($matches[0] as $found) {
 				debug("found \$live template$ == $found");
-				$string = str_replace($found, $this->parseLIVETEMPLATE($found), $string);
+				$string = str_replace($found, $this->parseLIVE($found), $string);
 			}
 		}
-//		if (preg_match_all('/\$[a-zA-Z0-9-_]+:[a-zA-Z0-9-_]\([^)]+\)\$/', $string, $matches) > 0) {
-//		}
+		if (preg_match_all('/\$[a-zA-Z0-9-_]+:[a-zA-Z0-9-_]+\([^)]*\)\$/', $string, $matches) > 0) {
+			foreach ($matches[0] as $found) {
+				debug("found \$map template$ == $found");
+				$string = str_replace($found, $this->parseMAP($found), $string);
+			}
+		}
 		if (preg_match_all('/\$[a-zA-Z0-9-_]+\$/', $string, $matches) > 0) {
 			foreach ($matches[0] as $found) {
 				debug("found \$var$ == $found");
@@ -146,9 +174,9 @@ function debugOff() {
 function debug($s) {
 	global $debug;
 	if ($debug) {
-#		print "$s\n";
+		print "$s\n";
 	}
 }
 
-# vim:filetype=html:ts=4:sw=4
+# vim:ts=4:sw=4
 ?>

@@ -39,13 +39,27 @@ if (true) {
 	$page->add('var', 'potato');
 	$page->add('var2', 'tomato');
 	compare($page->render(), 'tt/basic.html.potato', 'basic');
-
-	$page = new SimpleTemplate('tt/live.html');
-	$page->add('fruit', array('apple', 'orange', 'banana'));
-	$page->add('title', 'The Title');
-	$page->add('name', 'Mark');
-	compare($page->render(), 'tt/live.html.out', 'live TEMPLATE');
 }
+
+$page = new SimpleTemplate('tt/live.html');
+$page->add('fruit', array('apple', 'orange', 'banana'));
+$page->add('title', 'The Title');
+$page->add('name', 'Mark');
+compare($page->render(), 'tt/live.html.out', 'live TEMPLATE');
+
+$page = new SimpleTemplate('tt/map.html');
+$page->add('fruit', array('apple', 'orange', 'banana'));
+compare($page->render(), 'tt/map.html.out', 'map TEMPLATE');
+
+$list = array();
+$list[] = array("name" => "John", "height" => "175");
+$list[] = array("name" => "Peter", "height" => "177");
+$list[] = array("name" => "Mathew", "height" => "179");
+$list[] = array("name" => "Mark", "height" => "181");
+$page = new SimpleTemplate('tt/map2.html');
+$page->add('list', $list);
+#$page->add('list', array('apple', 'orange', 'banana'));
+compare($page->render(), 'tt/map2.html.out', 'map (object) TEMPLATE');
 
 print "done. Passed $passed of $total\n";
 
@@ -58,10 +72,10 @@ function compare($string, $file, $name) {
 	$string = preg_replace('/^\n+/', '', $string);
 	$string = preg_replace('/\n+$/', "\n", $string);
 	if ($string == $string2) {
-		print "$name: Passed\n";
+		print "$name: * * * Passed * * *\n";
 		$passed ++;
 	} else {
-		print "$name: FAILED\n";
+		print "$name: * * * FAILED * * *\n";
 		print "Got: $string\nExpected: $string2\n";
 		$failed ++;
 	}

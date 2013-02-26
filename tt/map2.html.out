@@ -1,0 +1,28 @@
+The Good, the Bad and the Ugly<br />
+As a row:
+<ul>
+	<li>John : 175</li>
+	<li>Peter : 177</li>
+	<li>Mathew : 179</li>
+	<li>Mark : 181</li>
+
+</ul>
+
+Using an alias:
+<ul>
+	<li>John : 175</li>
+	<li>Peter : 177</li>
+	<li>Mathew : 179</li>
+	<li>Mark : 181</li>
+
+</ul>
+
+Try that again:<br />
+As a live template
+<ul>
+	<li>John : 175</li>
+	<li>Peter : 177</li>
+	<li>Mathew : 179</li>
+	<li>Mark : 181</li>
+
+</ul>
