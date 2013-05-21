@@ -1,7 +1,7 @@
 #! /usr/bin/php
 <?php
 
-require 'SimpleTemplate.Class.php';
+require 'SimpleTemplate.php';
 
 $passed = $failed = $total = 0;
 

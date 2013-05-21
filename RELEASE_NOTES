@@ -1,6 +1,22 @@
-version 0.3
-- $var:template(alias)$
-- $var:template()$
+    version 0.5
+    - dropped ".Class" from filename. Now just SimpleTemplate.php
+    - errors now reference template in use
+
+commit 9a80400caf4b4ce1de167b4cb28846951fa1f487
+Author: Mark Bates <thebatesboy@gmail.com>
+Date:   Tue May 21 17:40:17 2013 +1000
+
+    version 0.4
+    - improved error messages
+    - added/fixed some of the tests
+
+commit 348810e4f0d6d73dff73448374148f0fa2885454
+Author: Mark Bates <thebatesboy@gmail.com>
+Date:   Tue Feb 26 22:38:43 2013 +1100
+
+    version 0.3
+    - $var:template(alias)$
+    - $var:template()$
 
 commit 6c0f40516a1425ca120184843a44f61e984127d4
 Author: Mark Bates <thebatesboy@gmail.com>

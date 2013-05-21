@@ -1,6 +1,6 @@
 <?php
 
-require 'SimpleTemplate.Class.php';
+require 'SimpleTemplate.php';
 
 $fruit = array('apple', 'orange', 'banana');
 $apples = array('royal gala', 'pink lady', 'jonathan', 'golden delicious', 'fuji', 'granny smith');
