@@ -4,17 +4,17 @@ class SimpleTemplate {
 	protected $templateInUse;
 	protected $page;
 	protected $attr;
-	public $version = "0.5";
+	public $version = "0.51";
 
 	function SimpleTemplate($file) {
 		$this->templateInUse = $file;
-		$this->getTemplate($file);
-		$this->templateDir = dirname($file);
-		$this->suffix = "html";
+		$this->loadTemplate($file);
+		$parts = pathinfo($file);
+		$this->templateDir = $parts['dirname'];
+		$this->suffix = $parts['extension'];
 	}
 
-	function getTemplate($file) {
-
+	function loadTemplate($file) {
 		$this->page = file_get_contents($file);
 	}
 
@@ -23,7 +23,7 @@ class SimpleTemplate {
 	}
 
 	function render() {
-		return $this->template($this->page);
+		return $this->renderTemplate($this->page);
 	}
 
 	/*
@@ -65,7 +65,7 @@ class SimpleTemplate {
 		}
 		$name = $matches[1];
 		debug("extracted template name as: $name");
-		return $this->template(file_get_contents("$this->templateDir/$name.$this->suffix"));
+		return $this->renderTemplate(file_get_contents("$this->templateDir/$name.$this->suffix"));
 	}
 
 	function parseLIVE($string) {
@@ -129,7 +129,7 @@ class SimpleTemplate {
 		return $this->attr[$var];
 	}
 
-	function template($string) {
+	function renderTemplate($string) {
 		global $x, $y;
 		debug("\n\nchecking for IF");
 		if (preg_match_all('/\$if\([^)]+\)\$.*\$endif\$/Us', $string, $matches) > 0) {
