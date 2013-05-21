@@ -1,3 +1,4 @@
+#! /usr/bin/php
 <?php
 
 require 'SimpleTemplate.Class.php';
@@ -60,6 +61,8 @@ $page = new SimpleTemplate('tt/map2.html');
 $page->add('list', $list);
 #$page->add('list', array('apple', 'orange', 'banana'));
 compare($page->render(), 'tt/map2.html.out', 'map (object) TEMPLATE');
+
+debugOn();
 
 print "done. Passed $passed of $total\n";
 

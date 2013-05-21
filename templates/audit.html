@@ -1,7 +1,9 @@
 $header()$
 <h1>$title$</h1>
 
+$if(list)$
 $dropdown(list)$
+$endif$
 
 <p>Hello, $name$</p>
 
@@ -23,11 +25,15 @@ $fruit:{f|	<li><i>$f$</i></li>
 }$
 </ul>
 
+$if(justapples)$ xyz
 A list of apples:
 <ul>
-$justapplies:{a|<li>$a$</li>}$
+$justapples:{a|<li>$a$</li>}$
 </ul>
+$endif$
+$if(object)$
 $object:{o|<li>$o$->head, $o$->tail</li>}$
+$endif$
 
 <h2>How about a table?</h2>
 
@@ -40,4 +46,4 @@ $table_row:{r|<td>$r$</td>}$
 <tr>
 </table>
 
-$footer(version)$
+$footer()$
