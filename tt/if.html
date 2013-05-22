@@ -1,4 +1,11 @@
 $if(cond)$
-show me
-show me now
+show me1
+show me now2
 $endif$
+----
+$if(cond)$show me show me now3$endif$
+----
+$if(cond)$show me show me now4$endif$
+$if(cond)$show me show me now5$endif$
+----
+$if(cond)$show me show me now6$endif$$if(cond)$show me show me now7$endif$

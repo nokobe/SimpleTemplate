@@ -1,3 +1,20 @@
+    version .6
+    - added $if(!cond)$
+    - removed lingering newlines being left in render
+
+commit ab13c7d827ce0adcdd2a7a57b46c5f9c63e0a50d
+Author: Mark Bates <thebatesboy@gmail.com>
+Date:   Tue May 21 19:27:53 2013 +1000
+
+    version .51
+    - added .gitignore
+    - renamed some functions
+    - use of pathinfo() when saving template details
+
+commit 2f9be10baa4677b914cc694c1e047ed1ae54f5b5
+Author: Mark Bates <thebatesboy@gmail.com>
+Date:   Tue May 21 17:53:09 2013 +1000
+
     version 0.5
     - dropped ".Class" from filename. Now just SimpleTemplate.php
     - errors now reference template in use

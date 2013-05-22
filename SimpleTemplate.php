@@ -4,7 +4,7 @@ class SimpleTemplate {
 	protected $templateInUse;
 	protected $page;
 	protected $attr;
-	public $version = "0.51";
+	public $version = "0.6";
 
 	function SimpleTemplate($file) {
 		$this->templateInUse = $file;
@@ -26,35 +26,72 @@ class SimpleTemplate {
 		return $this->renderTemplate($this->page);
 	}
 
+	function parseCOND($condition) {
+		# tokenise, substitute, evaluate
+		debug("parseCOND: $condition");
+
+		$reverseResult = false;
+		if ($condition[0] == '!') {
+			$reverseResult = true;
+			$condition = str_replace('!', '', $condition);
+		}
+		if (isset($this->attr[$condition])) {
+			$result = is_bool($this->attr[$condition]) ? $this->attr[$condition] : true;
+		} else {
+			$result = false;
+		}
+		return $reverseResult ? ! $result : $result;
+	}
+
 	/*
 	 * parseIF
 	 */
 	function parseIF($string) {
-		debug("checking : [[[ $string ]]]");
-		if (! preg_match('/\$if\(([^)]+)\)\$/', $string, $matches)) {
-			$this->fatal("parseIF.1 failed: couldn't find '/\$if\(([^)]+)\)\$/' in $string");
+		debug("parsing IF");
+		$pattern = '/\$if\(([^)]+)\)\$/';
+		if (! preg_match($pattern, $string, $matches)) {
+			$this->fatal("parseIF.1 failed: couldn't find $pattern in $string");
 		}
-		$cond = $matches[1];
-		debug("cond = $cond");
-		if (isset($this->attr[$cond])) {
-			$ifCOND = is_bool($this->attr[$cond]) ? $this->attr[$cond] : true;
-		} else {
-			$ifCOND = false;
-		}
+		$ifCOND = $this->parseCOND($matches[1]);
 		debug("ifCOND is : ".($ifCOND ? "true" : "false"));
-		# check if there is an ELSE 
-		debug("checking : [[[ $string ]]]");
-		if (preg_match('/\$if\([^)]+\)\$(.*)\$else\$(.*)\$endif\$/s', $string, $matches)) {
+		debug("now checking for ELSE");
+		if (preg_match('/\$if\([^)]+\)\$\n?(.*)\$else\$\n?(.*?)\$endif\$\n?/s', $string, $matches)) {
+			debug("has ELSE");
 			$bodyTrue = $matches[1];
 			$bodyFalse = $matches[2];
+
+			if (!preg_match('/\n\$else\$\n/s', $string)) {
+				# need to allow any newline to be preserved
+				if (preg_match('/\$endif\$\n/s', $string)) {
+					$bodyTrue .= "\n";
+				}
+			}
+			if (!preg_match('/\n\$endif\$\n/s', $string)) {
+				# need to allow any newline to be preserved
+				if (preg_match('/\$endif\$\n/s', $string)) {
+					$bodyFalse .= "\n";
+				}
+			}
+			debug("bodyTrue = [$bodyTrue]");
+			debug("bodyFalse = [$bodyFalse]");
 			return $ifCOND ? $bodyTrue : $bodyFalse;
 		}
-		else if (preg_match('/\$if\([^)]+\)\$(.*)\$endif\$/s', $string, $matches)) {
-			$body = $matches[1];
-			return $ifCOND ? $body : "";
+		else if (preg_match('/\$if\([^)]+\)\$\n?(.*)\$endif\$/s', $string, $matches)) {
+			debug("no ELSE");
+			$bodyTrue = $matches[1];
+			$bodyFalse = '';
+			if (!preg_match('/\n\$endif\$\n/s', $string)) {
+				# need to allow any newline to be preserved
+				if (preg_match('/\$endif\$\n/s', $string)) {
+					$bodyTrue .= "\n";
+				}
+			}
+			debug("bodyTrue = [$bodyTrue]");
+			debug("bodyFalse = [$bodyFalse]");
+			return $ifCOND ? $bodyTrue : $bodyFalse;
 		}
 		else {
-			$this->fatal("parseIF.2 failed");
+			$this->fatal("parseIF.2 failed. Missing \$endif\$ ?");
 		}
 	}
 
@@ -132,17 +169,27 @@ class SimpleTemplate {
 	function renderTemplate($string) {
 		global $x, $y;
 		debug("\n\nchecking for IF");
-		if (preg_match_all('/\$if\([^)]+\)\$.*\$endif\$/Us', $string, $matches) > 0) {
+		$regex = '/
+		#	\n?			# match the newline when possible
+			\$if\([^)]+\)\$
+			(.*?)		# be ungreedy here!
+			\$endif\$
+			\n?			# match the newline when possible
+			/sx';
+		if (preg_match_all($regex, $string, $matches) > 0) {
 			foreach ($matches[0] as $found) {
-				debug("found \$if()\$ == $found");
+				debug("found \$if()\$...\$endif\$ in [$found]");
 				$string = str_replace($found, $this->parseIF($found), $string);
 			}
 		}
+
 		debug("\n\nchecking for TEMPLATE");
-		if (preg_match_all('/\$[a-zA-Z0-9-_]+\(\)\$/', $string, $matches) > 0) {
+		if (preg_match_all('/\$[a-zA-Z0-9-_]+\(\)\$(\n|$)?/', $string, $matches) > 0) {
 			foreach ($matches[0] as $found) {
-				debug("found \$template()$ == $found");
-				$string = str_replace($found, $this->parseTEMPLATE($found), $string);
+				$trimmed = trim($found);
+				debug("found \$template()$ == [$found]");
+				debug("found trimmed \$template()$ == [$trimmed]");
+				$string = str_replace($found, $this->parseTEMPLATE($trimmed), $string);
 			}
 		}
 		debug("\n\nchecking for LIVE TEMPLATE");
@@ -186,7 +233,8 @@ function debugOff() {
 function debug($s) {
 	global $debug;
 	if ($debug) {
-		print "$s\n";
+		print str_replace("\n", "\n| \t", $s);
+		print "\n";
 	}
 }
 
