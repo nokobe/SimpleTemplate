@@ -82,6 +82,15 @@ if ($set) {
 	#$page->add('list', array('apple', 'orange', 'banana'));
 	compare($page->render(), 'tt/map2.html.out', 'map (object) TEMPLATE');
 
+	# complex var (hash)
+	$page = new SimpleTemplate('tt/hash.html');
+	$page->add('user', array('name' => 'John', 'age' => '35', 'hair' => 'blue'));
+	compare($page->render(), 'tt/hash.html.out', 'complex (hash) VAR');
+
+	# complex var (hash) (recursive template)
+	$page = new SimpleTemplate('tt/rhash.html');
+	$page->add('user', array('name' => 'John', 'age' => '35', 'hair' => 'blue'));
+	compare($page->render(), 'tt/rhash.html.out', 'complex (hash) (recursive) VAR');
 }
 
 print "done. Passed $passed of $total\n";

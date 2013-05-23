@@ -5,7 +5,7 @@ class SimpleTemplate {
 	protected $page;
 	protected $attr;
 	protected $trace = 0; # for debugging
-	public $version = "0.6";
+	public $version = "0.7";
 
 	function SimpleTemplate($file) {
 		$this->templateInUse = $file;
@@ -51,7 +51,7 @@ class SimpleTemplate {
 		$this->trace("parsing IF");
 		$pattern = '/\$if\(([^)]+)\)\$/';
 		if (! preg_match($pattern, $string, $matches)) {
-			$this->fatal("parseIF.1 failed: couldn't find $pattern in $string");
+			$this->fatal("Parse IF (#1) failed: couldn't find \$if()\$ in string: $string");
 		}
 		$ifCOND = $this->parseCOND($matches[1]);
 		$this->trace("ifCOND is : ".($ifCOND ? "true" : "false"));
@@ -92,14 +92,14 @@ class SimpleTemplate {
 			return $ifCOND ? $bodyTrue : $bodyFalse;
 		}
 		else {
-			$this->fatal("parseIF.2 failed. Missing \$endif\$ ?");
+			$this->fatal("Parse IF (#2) failed: \$endif\$ not found");
 		}
 	}
 
 	function parseTEMPLATE($string) {
 		$this->trace("checking : [[[ $string ]]]");
 		if (! preg_match('/\$([a-zA-Z0-9-_]+)\(\)\$/', $string, $matches)) {
-			$this->fatal("parseTEMPLATE.1 failed: couldn't find '/\$([a-zA-Z0-9-_]+)\(\)\$/' in $string");
+			$this->fatal("Parse TEMPLATE (#1) failed: couldn't find \$template()\$ in string: $string");
 		}
 		$name = $matches[1];
 		$this->trace("extracted template name as: $name");
@@ -109,14 +109,14 @@ class SimpleTemplate {
 	function parseLIVE($string) {
 		$this->trace("checking : [[[ $string ]]]");
 		if (! preg_match('/\$([^: ]+):{([^|]+)\|([^}]+)}\$/', $string, $matches)) {
-			$this->fatal("parseLIVE.1 failed: couldn't find '/\$([^: ]+):{([^|]+)\|([^}]+)}\$/' in $string");
+			$this->fatal("Parse LIVE (#1) failed: couldn't find \$var:{alias|livetemplate}\$ in string: $string");
 		}
 		$var = $matches[1];
 		$alias = $matches[2];
 		$text = $matches[3];
 		$this->trace("var = $var\nalias = $alias\ntext = $text");
 		if (! isset($this->attr[$var])) {
-			$this->fatal("parseLIVE: missing (array) attribute for $var\n");
+			$this->fatal("Parse LIVE (#2): attribute \"$var\" not set. Expected array");
 		}
 		if (is_array($this->attr[$var])) {
 			$r = '';
@@ -130,21 +130,21 @@ class SimpleTemplate {
 				} else {
 					$r .= str_replace("\$$alias\$", $attr, $text, $count);
 					if ($count == 0) {
-						$this->fatal("parseLIVE: Iterating over \"$var\", couldn't find \$$alias\$ in template text: $text\n");
+						$this->fatal("Parse LIVE (#3): Iterating over \"$var\", couldn't find \$$alias\$ in template text: $text");
 					}
 				}
 			}
 			return $r;
 		}
 		else {
-			$this->fatal("parseLIVE: $var is not an array!\n");
+			$this->fatal("Parse LIVE (#4): \"$var\" is not an array");
 		}
 	}
 
 	function parseMAP($string) {
 		$this->trace("checking : [[[ $string ]]]");
 		if (! preg_match('/\$([a-zA-Z0-9-_]+):([a-zA-Z0-9-_]+)\(([^)]*)\)\$/', $string, $matches)) {
-			$this->fatal("parseMAP.1 failed: couldn't find '/\$([a-zA-Z0-9-_]+):([a-zA-Z0-9-_]+)\(([^)]*)\)\$/' in $string");
+			$this->fatal("Parse MAP (#1) failed: couldn't find \$var:sub_template()\$ in string: $string");
 		}
 		$var = $matches[1];
 		$template = $matches[2];
@@ -155,14 +155,15 @@ class SimpleTemplate {
 		return $this->parseLIVE("\$$var:".'{'."$alias|$text".'}'."\$");
 	}
 
+	# this function deprecated after version 0.6
 	function parseVAR($string) {
 		$this->trace("checking : [[[ $string ]]]");
 		if (! preg_match('/\$([a-zA-Z0-9-Z]+)\$/', $string, $matches)) {
-			$this->fatal("parseVAR.1 failed: couldn't find '/\$([a-zA-Z0-9-Z]+)\$/' in $string");
+			$this->fatal("Parse VAR (#1) failed: couldn't find \$var\$ in string: $string");
 		}
 		$var = $matches[1];
 		if (!isset($this->attr[$var])) {
-			$this->fatal("parseVAR: missing attribute for $var\n");
+			$this->fatal("Parse VAR (#2): missing attribute for \"$var\"");
 		}
 		return $this->attr[$var];
 	}
@@ -208,10 +209,25 @@ class SimpleTemplate {
 			}
 		}
 		$this->trace("\n\nchecking for VAR");
-		if (preg_match_all('/\$[a-zA-Z0-9-_]+\$/', $string, $matches) > 0) {
-			foreach ($matches[0] as $found) {
-				$this->trace("found \$var$ == $found");
-				$string = str_replace($found, $this->parseVAR($found), $string);
+		if (preg_match_all('/\$([a-zA-Z0-9-_]+)\$/', $string, $matches, PREG_SET_ORDER) > 0) {
+			foreach ($matches as $found) {
+				$var = $found[1];
+				$this->trace("found \$var$ == $var");
+				if (!isset($this->attr[$var])) {
+					$this->fatal("Parse VAR: no attribute for \$$var\$");
+				}
+				$string = str_replace($found[0], $this->attr[$var], $string);
+			}
+		}
+		$this->trace("\n\nchecking for ARRAY VAR");
+		if (preg_match_all('/\$([a-zA-Z0-9-_]+)\[([^\]]+)\]\$/', $string, $matches, PREG_SET_ORDER) > 0) {
+			foreach ($matches as $found) {
+				$var = $found[1];
+				$idx = $found[2];
+				if (! isset($this->attr[$var][$idx])) {
+					$this->fatal("Parse ARRAYVAR: no attribute found for \${$var}[$idx]\$");
+				}
+				$string = str_replace($found[0], $this->attr[$var][$idx], $string);
 			}
 		}
 		return $string;
@@ -219,7 +235,7 @@ class SimpleTemplate {
 
 	function fatal($message) {
 			$templateInUse = $this->templateInUse;
-			die("$templateInUse :: $message");
+			die("Error processing template($templateInUse):: $message\n");
 	}
 
 	function traceOn() {
