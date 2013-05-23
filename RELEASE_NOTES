@@ -1,4 +1,37 @@
-    version .6
+   - added README
+   - added overlooked test files from version 0.7
+
+commit 6f0049b33a4c44825b4887fd906fcba8a7862cdf
+Author: Mark Bates <thebatesboy@gmail.com>
+Date:   Thu May 23 16:00:10 2013 +1000
+
+    version 0.7
+    - added $arrayvar[element]$
+    - improved error message format, consistency
+
+commit 0756a28bdb7fd57cf91588f4b5e066f08a611ce4
+Author: Mark Bates <thebatesboy@gmail.com>
+Date:   Thu May 23 11:19:49 2013 +1000
+
+    Internalised debug functions.
+    - Now available as $obj->traceOn() and $obj->traceOff()
+
+commit f46d4777061374eb3eadc6770cf0374161b12f63
+Merge: 1f9506c 9ad12ed
+Author: Mark Bates <thebatesboy@gmail.com>
+Date:   Thu May 23 11:09:28 2013 +1000
+
+    Merge branch 'master' of /Users/mark/Dropbox/gitrepo/SimpleTemplate
+    Conflicts:
+    	SimpleTemplate.Class.php
+    (Had reimplemented the remote changes locally anyway, so no
+    functionality lost)
+
+commit 1f9506cf40b5146a7cbe134ca053e26782a9306d
+Author: Mark Bates <thebatesboy@gmail.com>
+Date:   Thu May 23 00:44:05 2013 +1000
+
+    version 0.6
     - added $if(!cond)$
     - removed lingering newlines being left in render
 
@@ -26,6 +59,12 @@ Date:   Tue May 21 17:40:17 2013 +1000
     version 0.4
     - improved error messages
     - added/fixed some of the tests
+
+commit 9ad12ed68cc680a62d7248630a483e20cb5df367
+Author: Mark Bates <mbates@unimelb.edu.au>
+Date:   Mon May 20 12:47:31 2013 +1000
+
+    better error message - now includes name of template
 
 commit 348810e4f0d6d73dff73448374148f0fa2885454
 Author: Mark Bates <thebatesboy@gmail.com>
