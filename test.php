@@ -9,88 +9,88 @@ $set = true;
 $trace = false;
 
 if ($set) {
-	$page = new SimpleTemplate('tt/if.html');
+	$page = new SimpleTemplate('testfiles/if.html');
 	if ($trace) { $page->traceOn(); }
 	$page->add('cond', true);
-	compare($page->render(), 'tt/if.html.true', '$if(true)$');
+	compare($page->render(), 'testfiles/if.html.true', '$if(true)$');
 
-	$page = new SimpleTemplate('tt/if.html');
+	$page = new SimpleTemplate('testfiles/if.html');
 	if ($trace) { $page->traceOn(); }
 	$page->add('cond', false);
-	compare($page->render(), 'tt/if.html.false', '$if(false)$');
+	compare($page->render(), 'testfiles/if.html.false', '$if(false)$');
 
-	$page = new SimpleTemplate('tt/complexif.html');
+	$page = new SimpleTemplate('testfiles/complexif.html');
 	if ($trace) { $page->traceOn(); }
 	$page->add('condtrue', true);
 	$page->add('condfalse', false);
-	compare($page->render(), 'tt/complexif.html.out', '$if(complexcond)$');
+	compare($page->render(), 'testfiles/complexif.html.out', '$if(complexcond)$');
 
-	$page = new SimpleTemplate('tt/ifelse.html');
+	$page = new SimpleTemplate('testfiles/ifelse.html');
 	if ($trace) { $page->traceOn(); }
 	$page->add('cond', true);
-	compare($page->render(), 'tt/ifelse.html.true', '$ifelse(true)$');
+	compare($page->render(), 'testfiles/ifelse.html.true', '$ifelse(true)$');
 
-	$page = new SimpleTemplate('tt/ifelse.html');
+	$page = new SimpleTemplate('testfiles/ifelse.html');
 	if ($trace) { $page->traceOn(); }
 	$page->add('cond', false);
-	compare($page->render(), 'tt/ifelse.html.false', '$ifelse(false)$');
+	compare($page->render(), 'testfiles/ifelse.html.false', '$ifelse(false)$');
 
-	$page = new SimpleTemplate('tt/body.html');
+	$page = new SimpleTemplate('testfiles/body.html');
 	if ($trace) { $page->traceOn(); }
 	$page->add('title', 'The Title');
-	compare($page->render(), 'tt/body.html.out', '$template()$');
+	compare($page->render(), 'testfiles/body.html.out', '$template()$');
 
-	$page = new SimpleTemplate('tt/body2.html');
+	$page = new SimpleTemplate('testfiles/body2.html');
 	if ($trace) { $page->traceOn(); }
 	$page->add('cond', true);
 	$page->add('title', 'The Title');
-	compare($page->render(), 'tt/body2.html.true', 'recursion(w\ true)');
+	compare($page->render(), 'testfiles/body2.html.true', 'recursion(w\ true)');
 
-	$page = new SimpleTemplate('tt/body2.html');
+	$page = new SimpleTemplate('testfiles/body2.html');
 	if ($trace) { $page->traceOn(); }
 	$page->add('cond', false);
 	$page->add('title', 'The Title');
-	compare($page->render(), 'tt/body2.html.false', 'recursion(w\ false)');
+	compare($page->render(), 'testfiles/body2.html.false', 'recursion(w\ false)');
 
-	$page = new SimpleTemplate('tt/basic.html');
+	$page = new SimpleTemplate('testfiles/basic.html');
 	if ($trace) { $page->traceOn(); }
 	$page->add('var', 'potato');
 	$page->add('var2', 'tomato');
-	compare($page->render(), 'tt/basic.html.potato', 'basic');
+	compare($page->render(), 'testfiles/basic.html.potato', 'basic');
 
-	$page = new SimpleTemplate('tt/live.html');
+	$page = new SimpleTemplate('testfiles/live.html');
 	if ($trace) { $page->traceOn(); }
 	$page->add('fruit', array('apple', 'orange', 'banana'));
 	$page->add('title', 'The Title');
 	$page->add('name', 'Mark');
-	compare($page->render(), 'tt/live.html.out', 'live TEMPLATE');
+	compare($page->render(), 'testfiles/live.html.out', 'live TEMPLATE');
 
 	#
-	$page = new SimpleTemplate('tt/map.html');
+	$page = new SimpleTemplate('testfiles/map.html');
 	if ($trace) { $page->traceOn(); }
 	$page->add('fruit', array('apple', 'orange', 'banana'));
-	compare($page->render(), 'tt/map.html.out', 'map TEMPLATE');
+	compare($page->render(), 'testfiles/map.html.out', 'map TEMPLATE');
 
 	$list = array();
 	$list[] = array("name" => "John", "height" => "175");
 	$list[] = array("name" => "Peter", "height" => "177");
 	$list[] = array("name" => "Mathew", "height" => "179");
 	$list[] = array("name" => "Mark", "height" => "181");
-	$page = new SimpleTemplate('tt/map2.html');
+	$page = new SimpleTemplate('testfiles/map2.html');
 	if ($trace) { $page->traceOn(); }
 	$page->add('list', $list);
 	#$page->add('list', array('apple', 'orange', 'banana'));
-	compare($page->render(), 'tt/map2.html.out', 'map (object) TEMPLATE');
+	compare($page->render(), 'testfiles/map2.html.out', 'map (object) TEMPLATE');
 
 	# complex var (hash)
-	$page = new SimpleTemplate('tt/hash.html');
+	$page = new SimpleTemplate('testfiles/hash.html');
 	$page->add('user', array('name' => 'John', 'age' => '35', 'hair' => 'blue'));
-	compare($page->render(), 'tt/hash.html.out', 'complex (hash) VAR');
+	compare($page->render(), 'testfiles/hash.html.out', 'complex (hash) VAR');
 
 	# complex var (hash) (recursive template)
-	$page = new SimpleTemplate('tt/rhash.html');
+	$page = new SimpleTemplate('testfiles/rhash.html');
 	$page->add('user', array('name' => 'John', 'age' => '35', 'hair' => 'blue'));
-	compare($page->render(), 'tt/rhash.html.out', 'complex (hash) (recursive) VAR');
+	compare($page->render(), 'testfiles/rhash.html.out', 'complex (hash) (recursive) VAR');
 }
 
 print "done. Passed $passed of $total\n";
@@ -100,9 +100,10 @@ exit(0);
 function compareWithDiff($string, $file, $name) {
 	echo "\n\nCHECKING WITH SDIFF\n\n";
 	echo "Render | Expected Output\n";
-	$tmpfile = "_xyz";
+	$tmpfile = "_tmpfile";
 	file_put_contents($tmpfile, $string);
 	passthru("sdiff $tmpfile $file");
+	unlink($tmpfile);
 #	print "showing render:\n";
 #	passthru("cat $tmpfile");
 #	print "---end render---\n";
