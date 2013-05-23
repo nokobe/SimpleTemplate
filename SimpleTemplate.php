@@ -4,6 +4,7 @@ class SimpleTemplate {
 	protected $templateInUse;
 	protected $page;
 	protected $attr;
+	protected $trace = 0; # for debugging
 	public $version = "0.6";
 
 	function SimpleTemplate($file) {
@@ -28,7 +29,7 @@ class SimpleTemplate {
 
 	function parseCOND($condition) {
 		# tokenise, substitute, evaluate
-		debug("parseCOND: $condition");
+		$this->trace("parseCOND: $condition");
 
 		$reverseResult = false;
 		if ($condition[0] == '!') {
@@ -47,16 +48,16 @@ class SimpleTemplate {
 	 * parseIF
 	 */
 	function parseIF($string) {
-		debug("parsing IF");
+		$this->trace("parsing IF");
 		$pattern = '/\$if\(([^)]+)\)\$/';
 		if (! preg_match($pattern, $string, $matches)) {
 			$this->fatal("parseIF.1 failed: couldn't find $pattern in $string");
 		}
 		$ifCOND = $this->parseCOND($matches[1]);
-		debug("ifCOND is : ".($ifCOND ? "true" : "false"));
-		debug("now checking for ELSE");
+		$this->trace("ifCOND is : ".($ifCOND ? "true" : "false"));
+		$this->trace("now checking for ELSE");
 		if (preg_match('/\$if\([^)]+\)\$\n?(.*)\$else\$\n?(.*?)\$endif\$\n?/s', $string, $matches)) {
-			debug("has ELSE");
+			$this->trace("has ELSE");
 			$bodyTrue = $matches[1];
 			$bodyFalse = $matches[2];
 
@@ -72,12 +73,12 @@ class SimpleTemplate {
 					$bodyFalse .= "\n";
 				}
 			}
-			debug("bodyTrue = [$bodyTrue]");
-			debug("bodyFalse = [$bodyFalse]");
+			$this->trace("bodyTrue = [$bodyTrue]");
+			$this->trace("bodyFalse = [$bodyFalse]");
 			return $ifCOND ? $bodyTrue : $bodyFalse;
 		}
 		else if (preg_match('/\$if\([^)]+\)\$\n?(.*)\$endif\$/s', $string, $matches)) {
-			debug("no ELSE");
+			$this->trace("no ELSE");
 			$bodyTrue = $matches[1];
 			$bodyFalse = '';
 			if (!preg_match('/\n\$endif\$\n/s', $string)) {
@@ -86,8 +87,8 @@ class SimpleTemplate {
 					$bodyTrue .= "\n";
 				}
 			}
-			debug("bodyTrue = [$bodyTrue]");
-			debug("bodyFalse = [$bodyFalse]");
+			$this->trace("bodyTrue = [$bodyTrue]");
+			$this->trace("bodyFalse = [$bodyFalse]");
 			return $ifCOND ? $bodyTrue : $bodyFalse;
 		}
 		else {
@@ -96,24 +97,24 @@ class SimpleTemplate {
 	}
 
 	function parseTEMPLATE($string) {
-		debug("checking : [[[ $string ]]]");
+		$this->trace("checking : [[[ $string ]]]");
 		if (! preg_match('/\$([a-zA-Z0-9-_]+)\(\)\$/', $string, $matches)) {
 			$this->fatal("parseTEMPLATE.1 failed: couldn't find '/\$([a-zA-Z0-9-_]+)\(\)\$/' in $string");
 		}
 		$name = $matches[1];
-		debug("extracted template name as: $name");
+		$this->trace("extracted template name as: $name");
 		return $this->renderTemplate(file_get_contents("$this->templateDir/$name.$this->suffix"));
 	}
 
 	function parseLIVE($string) {
-		debug("checking : [[[ $string ]]]");
+		$this->trace("checking : [[[ $string ]]]");
 		if (! preg_match('/\$([^: ]+):{([^|]+)\|([^}]+)}\$/', $string, $matches)) {
 			$this->fatal("parseLIVE.1 failed: couldn't find '/\$([^: ]+):{([^|]+)\|([^}]+)}\$/' in $string");
 		}
 		$var = $matches[1];
 		$alias = $matches[2];
 		$text = $matches[3];
-		debug("var = $var\nalias = $alias\ntext = $text");
+		$this->trace("var = $var\nalias = $alias\ntext = $text");
 		if (! isset($this->attr[$var])) {
 			$this->fatal("parseLIVE: missing (array) attribute for $var\n");
 		}
@@ -141,21 +142,21 @@ class SimpleTemplate {
 	}
 
 	function parseMAP($string) {
-		debug("checking : [[[ $string ]]]");
+		$this->trace("checking : [[[ $string ]]]");
 		if (! preg_match('/\$([a-zA-Z0-9-_]+):([a-zA-Z0-9-_]+)\(([^)]*)\)\$/', $string, $matches)) {
 			$this->fatal("parseMAP.1 failed: couldn't find '/\$([a-zA-Z0-9-_]+):([a-zA-Z0-9-_]+)\(([^)]*)\)\$/' in $string");
 		}
 		$var = $matches[1];
 		$template = $matches[2];
 		$alias = $matches[3] == "" ? 'attr' : "$matches[3]";
-		debug("var = $var\ntemplate = $template\nalias = $alias");
+		$this->trace("var = $var\ntemplate = $template\nalias = $alias");
 #		$text = trim(file_get_contents("$this->templateDir/$template.$this->suffix"), "\n");
 		$text = file_get_contents("$this->templateDir/$template.$this->suffix");
 		return $this->parseLIVE("\$$var:".'{'."$alias|$text".'}'."\$");
 	}
 
 	function parseVAR($string) {
-		debug("checking : [[[ $string ]]]");
+		$this->trace("checking : [[[ $string ]]]");
 		if (! preg_match('/\$([a-zA-Z0-9-Z]+)\$/', $string, $matches)) {
 			$this->fatal("parseVAR.1 failed: couldn't find '/\$([a-zA-Z0-9-Z]+)\$/' in $string");
 		}
@@ -168,7 +169,7 @@ class SimpleTemplate {
 
 	function renderTemplate($string) {
 		global $x, $y;
-		debug("\n\nchecking for IF");
+		$this->trace("\n\nchecking for IF");
 		$regex = '/
 		#	\n?			# match the newline when possible
 			\$if\([^)]+\)\$
@@ -178,38 +179,38 @@ class SimpleTemplate {
 			/sx';
 		if (preg_match_all($regex, $string, $matches) > 0) {
 			foreach ($matches[0] as $found) {
-				debug("found \$if()\$...\$endif\$ in [$found]");
+				$this->trace("found \$if()\$...\$endif\$ in [$found]");
 				$string = str_replace($found, $this->parseIF($found), $string);
 			}
 		}
 
-		debug("\n\nchecking for TEMPLATE");
+		$this->trace("\n\nchecking for TEMPLATE");
 		if (preg_match_all('/\$[a-zA-Z0-9-_]+\(\)\$(\n|$)?/', $string, $matches) > 0) {
 			foreach ($matches[0] as $found) {
 				$trimmed = trim($found);
-				debug("found \$template()$ == [$found]");
-				debug("found trimmed \$template()$ == [$trimmed]");
+				$this->trace("found \$template()$ == [$found]");
+				$this->trace("found trimmed \$template()$ == [$trimmed]");
 				$string = str_replace($found, $this->parseTEMPLATE($trimmed), $string);
 			}
 		}
-		debug("\n\nchecking for LIVE TEMPLATE");
+		$this->trace("\n\nchecking for LIVE TEMPLATE");
 		if (preg_match_all('/\$[a-zA-Z0-9-_]+:{[^}]+}\$/', $string, $matches) > 0) {
 			foreach ($matches[0] as $found) {
-				debug("found \$live template$ == $found");
+				$this->trace("found \$live template$ == $found");
 				$string = str_replace($found, $this->parseLIVE($found), $string);
 			}
 		}
-		debug("\n\nchecking for MAP");
+		$this->trace("\n\nchecking for MAP");
 		if (preg_match_all('/\$[a-zA-Z0-9-_]+:[a-zA-Z0-9-_]+\([^)]*\)\$/', $string, $matches) > 0) {
 			foreach ($matches[0] as $found) {
-				debug("found \$map template$ == $found");
+				$this->trace("found \$map template$ == $found");
 				$string = str_replace($found, $this->parseMAP($found), $string);
 			}
 		}
-		debug("\n\nchecking for VAR");
+		$this->trace("\n\nchecking for VAR");
 		if (preg_match_all('/\$[a-zA-Z0-9-_]+\$/', $string, $matches) > 0) {
 			foreach ($matches[0] as $found) {
-				debug("found \$var$ == $found");
+				$this->trace("found \$var$ == $found");
 				$string = str_replace($found, $this->parseVAR($found), $string);
 			}
 		}
@@ -220,21 +221,18 @@ class SimpleTemplate {
 			$templateInUse = $this->templateInUse;
 			die("$templateInUse :: $message");
 	}
-}
 
-function debugOn() {
-	global $debug;
-	$debug = 1;
-}
-function debugOff() {
-	global $debug;
-	$debug = 0;
-}
-function debug($s) {
-	global $debug;
-	if ($debug) {
-		print str_replace("\n", "\n| \t", $s);
-		print "\n";
+	function traceOn() {
+		$this->trace = 1;
+	}
+	function traceOff() {
+		$this->trace = 0;
+	}
+	function trace($s) {
+		if ($this->trace) {
+			print str_replace("\n", "\n| \t", $s);
+			print "\n";
+		}
 	}
 }
 

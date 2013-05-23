@@ -6,50 +6,60 @@ require 'SimpleTemplate.php';
 $passed = $failed = $total = 0;
 
 $set = true;
+$trace = false;
 
-#	debugOn();
 if ($set) {
 	$page = new SimpleTemplate('tt/if.html');
+	if ($trace) { $page->traceOn(); }
 	$page->add('cond', true);
 	compare($page->render(), 'tt/if.html.true', '$if(true)$');
 
 	$page = new SimpleTemplate('tt/if.html');
+	if ($trace) { $page->traceOn(); }
 	$page->add('cond', false);
 	compare($page->render(), 'tt/if.html.false', '$if(false)$');
 
 	$page = new SimpleTemplate('tt/complexif.html');
+	if ($trace) { $page->traceOn(); }
 	$page->add('condtrue', true);
 	$page->add('condfalse', false);
 	compare($page->render(), 'tt/complexif.html.out', '$if(complexcond)$');
 
 	$page = new SimpleTemplate('tt/ifelse.html');
+	if ($trace) { $page->traceOn(); }
 	$page->add('cond', true);
 	compare($page->render(), 'tt/ifelse.html.true', '$ifelse(true)$');
 
 	$page = new SimpleTemplate('tt/ifelse.html');
+	if ($trace) { $page->traceOn(); }
 	$page->add('cond', false);
 	compare($page->render(), 'tt/ifelse.html.false', '$ifelse(false)$');
 
 	$page = new SimpleTemplate('tt/body.html');
+	if ($trace) { $page->traceOn(); }
 	$page->add('title', 'The Title');
 	compare($page->render(), 'tt/body.html.out', '$template()$');
 
 	$page = new SimpleTemplate('tt/body2.html');
+	if ($trace) { $page->traceOn(); }
 	$page->add('cond', true);
 	$page->add('title', 'The Title');
 	compare($page->render(), 'tt/body2.html.true', 'recursion(w\ true)');
 
 	$page = new SimpleTemplate('tt/body2.html');
+	if ($trace) { $page->traceOn(); }
 	$page->add('cond', false);
 	$page->add('title', 'The Title');
 	compare($page->render(), 'tt/body2.html.false', 'recursion(w\ false)');
 
 	$page = new SimpleTemplate('tt/basic.html');
+	if ($trace) { $page->traceOn(); }
 	$page->add('var', 'potato');
 	$page->add('var2', 'tomato');
 	compare($page->render(), 'tt/basic.html.potato', 'basic');
 
 	$page = new SimpleTemplate('tt/live.html');
+	if ($trace) { $page->traceOn(); }
 	$page->add('fruit', array('apple', 'orange', 'banana'));
 	$page->add('title', 'The Title');
 	$page->add('name', 'Mark');
@@ -57,6 +67,7 @@ if ($set) {
 
 	#
 	$page = new SimpleTemplate('tt/map.html');
+	if ($trace) { $page->traceOn(); }
 	$page->add('fruit', array('apple', 'orange', 'banana'));
 	compare($page->render(), 'tt/map.html.out', 'map TEMPLATE');
 
@@ -66,6 +77,7 @@ if ($set) {
 	$list[] = array("name" => "Mathew", "height" => "179");
 	$list[] = array("name" => "Mark", "height" => "181");
 	$page = new SimpleTemplate('tt/map2.html');
+	if ($trace) { $page->traceOn(); }
 	$page->add('list', $list);
 	#$page->add('list', array('apple', 'orange', 'banana'));
 	compare($page->render(), 'tt/map2.html.out', 'map (object) TEMPLATE');
