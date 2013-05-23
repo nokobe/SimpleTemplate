@@ -117,7 +117,7 @@ TEMPLATE SAMPLE:
 			hair colour:	$user[hair]$
 
 SPECIAL NOTES:
-	Note that you do not need to quote the index values
+	Do not quote index values in the template
 
 ================================================================================
 Conditional include			$if(condition)$ or $if(!condition)$
@@ -132,7 +132,7 @@ TEMPLATE SAMPLE:
 		$if(loggedIn)$
 			Welcome, $username$
 		$else$
-			$loginbox()$
+			Please enter your username and password
 		$endif$
 
 SPECIAL NOTES:
@@ -142,26 +142,30 @@ SPECIAL NOTES:
 
 	"!" in front of the condition will reverse the evaluated result
 
-	You may specify a condition parameter that has not been set. This is
-	the only time SimpleTemplate will not generate an error for a missing
-	parameter. In this situation, any unset parameter will default to FALSE.
-	This is useful for conditionally inclusions. eg:
+	You may specify a condition parameter that may not be set at runtime.
+	This is the only time SimpleTemplate will not generate an error for a
+	missing parameter. In this situation, any unset parameter will default
+	to FALSE.  This is useful for conditional includes. eg:
 			$if(results)$
-				$results:resultsTemplate()$
+				# eg: show results in a table...
 			$endif$
-	Any parameters used by resultsTemplate() will ONLY NEED TO BE DEFINED when
-	"results" is also set.
 	Another example:
-			$if(user)$
+			$if(loggedIn)$
 				greetings $user$
 			$else$
 				you are not logged in
 			$endif$
-	Note that if we didn't check for "user" to be set, then the later reference to $user$
-	would generate an error whenever "user" was not set!
+	Parameters used in the body or else clause of a conditional $if()$ will only be
+	evaluated if the condition matches. Thus, in the above example, the parameter: $user$
+	will only need to be set if the parameter: $loggedIn$ is set. This lets us do something
+	like:
+			$if(errormsg)$
+			$errormsg$
+			$endif$
+	without ever generating an error whenever "errormsg" is not set!
 
 	"condition" will only be evaluated as a simple boolean. If you want to use a
-	more complex condition, you will need to precompute it back in the code.
+	more complex condition, you will need to precompute it in the code.
 	eg. $page->add('condition', <put your complex expression here>);
 
 
@@ -196,10 +200,12 @@ EXPECTED OUTPUT:
 		</ul>
 
 SPECIAL NOTES:
-	Note that the alias must be included. The alias can be the same as the
-	variable name. eg: in the sample above, you could use "mylist" instead of "f"
+	The alias must be included. The alias can be the same as the variable name.
+	For instance, in the sample above, you could easily use an alias of
+	"mylist" instead of "f"
 
-	Note that you can include newlines in the live template. eg:
+	You can include newlines in the live template.
+	eg:
 			$mylist:{f|<li>$f$</li>
 }
 	So that the rendered output shows one <li> per line
@@ -234,18 +240,18 @@ TEMPLATES:
 		</html>
 
 SPECIAL NOTES:
-	Note that when referencing templates for inclusion:
-	1. you do not need to include the directory or suffix - they are
-	   assumed to be the same as for the original template.
-	2. any added parameters are available to the all the included templates
+	When referencing templates for inclusion:
+	1. Do not include the directory or suffix - they are assumed to
+	   be the same as for the original template.
+	2. All parameters added are also available to all included templates
 
 ================================================================================
-Template inclusion tied to var		$var:template()$
+Template inclusion tied to a variable		$var:template()$
 
 PUPOSE:
 	Similar to Live Template, except that the template code is tucked away
 	in another file. When no alias is specified (see following section for
-	"Template inclusion mapping a var") then SimpleTemplate assumes a default
+	"Template inclusion mapping to a variable") then SimpleTemplate assumes a default
 	of "attr"
 
 	This can be used as a simple way to decorate a list. For example, to
@@ -275,8 +281,9 @@ EXPECTED OUTPUT:
 TEMPLATE SAMPLE:
 
 ================================================================================
-Template inclusion mapping a var
+Template inclusion mapping to a variable
 	to an alias			$var:template(alias)$
 
 PURPOSE:
-	Same as previous section except that you are able to specify your own alias
+	Same as previous section except that you are able to specify your own alias, which
+	should then be the same variable referenced in the included template
