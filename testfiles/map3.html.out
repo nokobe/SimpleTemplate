@@ -1,0 +1,30 @@
+triple include?
+
+This:
+bolded item: <b>doh</b>
+bolded item: <b>ray</b>
+bolded item: <b>me</b>
+
+
+Same as this:
+bolded item: <b>doh</b>
+bolded item: <b>ray</b>
+bolded item: <b>me</b>
+
+
+Same as this:
+bolded item: <b>doh</b>
+bolded item: <b>ray</b>
+bolded item: <b>me</b>
+
+
+Just the item: doh
+Bold the item: <b>doh</b>
+
+Just the item: ray
+Bold the item: <b>ray</b>
+
+Just the item: me
+Bold the item: <b>me</b>
+
+

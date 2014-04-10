@@ -1,0 +1,30 @@
+A is false.
+B is true.
+
+testing !cond[a]
+$if(!$cond[a]$)$
+TEST 1: true
+$else$
+TEST 1: false
+$endif$
+
+testing cond[b]
+$if($cond[b]$)$
+TEST 2: true
+$else$
+TEST 2: false
+$endif$
+
+testing cond[a]
+$if($cond[a]$)$
+TEST 3: true
+$else$
+TEST 3: false
+$endif$
+
+testing !cond[b]
+$if(!$cond[b]$)$
+TEST 4: true
+$else$
+TEST 4: false
+$endif$

@@ -1,3 +1,9 @@
+Fri Apr 11, 2014 Version 0.8.0 added recursion + minor improvements
+   - now handles recursive templates
+   - handles $var[key]$ within if(condition)
+   - if($condition$) now expects '$' around condition
+     (but old style still works for now)
+   - improved test.php
    - added README
    - added overlooked test files from version 0.7
 

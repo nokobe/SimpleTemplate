@@ -17,6 +17,15 @@ Using an alias:
 
 </ul>
 
+Using an alias with a complex sub template
+<ul>
+	<li >John : 175</li>
+	<li >Peter : 177</li>
+	<li selected>Mathew : 179</li>
+	<li >Mark : 181</li>
+
+</ul>
+
 Try that again:<br />
 As a live template
 <ul>
@@ -24,5 +33,14 @@ As a live template
 	<li>Peter : 177</li>
 	<li>Mathew : 179</li>
 	<li>Mark : 181</li>
+
+</ul>
+
+Try that once more, with conditional within anonymous template<br />
+<ul>
+	<li >John : 175</li>
+	<li >Peter : 177</li>
+	<li selected>Mathew : 179</li>
+	<li >Mark : 181</li>
 
 </ul>

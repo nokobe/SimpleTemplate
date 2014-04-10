@@ -88,7 +88,15 @@ __________/ Template Constructs: \______________________________
 						...
 						$endif$
 
+						Where "condition" can be $var$ or $var[value]$
+						(for legacy reasons, $if(var)$ and $if(!var)$ also work)
+						If the var is not set, false is assumed
+					
+
 	Live template				$var:{alias|livetemplate}
+
+	(future enhancement)
+	Live template (complete)		$var1,var2:{alias1,alias2|livetemplate}
 
 	Template inclusion			$template()$
 

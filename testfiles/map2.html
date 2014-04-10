@@ -9,9 +9,20 @@ Using an alias:
 $list:rowN(n)$
 </ul>
 
+Using an alias with a complex sub template
+<ul>
+$list:rowN2(n)$
+</ul>
+
 Try that again:<br />
 As a live template
 <ul>
 $list:{n|	<li>$n[name]$ : $n[height]$</li>
+}$
+</ul>
+
+Try that once more, with conditional within anonymous template<br />
+<ul>
+$list:{n|	<li $if($n[selected]$)$selected$endif$>$n[name]$ : $n[height]$</li>
 }$
 </ul>

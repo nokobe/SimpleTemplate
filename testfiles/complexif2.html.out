@@ -1,0 +1,14 @@
+A is false.
+B is true.
+
+testing !cond[a]
+TEST 1: true
+
+testing cond[b]
+TEST 2: true
+
+testing cond[a]
+TEST 3: false
+
+testing !cond[b]
+TEST 4: false
