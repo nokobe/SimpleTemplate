@@ -5,7 +5,7 @@ class SimpleTemplate {
 	protected $page;
 	protected $attr;
 	protected $trace = 0; # for debugging
-	public $version = "0.9.0";
+	public $version = "0.10.0";
 
 	function SimpleTemplate($file, $live = 0) {
 		if ($live) {
@@ -42,8 +42,9 @@ class SimpleTemplate {
 		$this->page = file_get_contents($file);
 	}
 
-	function add($name, $value) {
+	function add($name, $value, $htmlentities = 1) {
 		$this->attr[$name] = $value;
+		$this->htmle[$name] = $htmlentities;
 	}
 
 	function render() {
@@ -88,6 +89,21 @@ class SimpleTemplate {
 			}
 		}
 		$this->fatal("GETATTR > attr for $var not found");
+	}
+
+	// recursively fetch value for HTMLE (whether or not to apply htmlentities)
+	function getHTMLE($var) {
+		// need to find the parent... then get the value for htmle
+		if (isset($this->attr[$var])) {
+			return $this->htmle[$var];
+		}
+
+		foreach ($this->parent as $parent) {
+			if ($parent->hasAttr($var)) {
+				return $parent->htmle[$var];
+			}
+		}
+		$this->fatal("GETHTMLE for $var failed");
 	}
 
 	// recursively fetch attribute: var[key]
@@ -283,8 +299,11 @@ class SimpleTemplate {
 					$this->fatal("Parse VAR: no attribute for \$$var\$");
 				}
 				$value = $this->getAttr($var);
+				if ($this->getHTMLE($var)) {
+					$value = htmlentities($value);
+				}
 				$this->trace("and it's set to : $value");
-				$string = str_replace($found[0], htmlentities($value), $string);
+				$string = str_replace($found[0], $value, $string);
 			}
 		}
 		return $string;
@@ -305,7 +324,10 @@ class SimpleTemplate {
 					$this->fatal("Parse ARRAYVAR: no attribute found for \${$var}[$idx]\$");
 				}
 				$value = $this->getAttr2($var, $idx);
-				$string = str_replace($found[0], htmlentities($value), $string);
+				if ($this->getHTMLE($var)) {
+					$value = htmlentities($value);
+				}
+				$string = str_replace($found[0], $value, $string);
 			}
 		}
 		return $string;

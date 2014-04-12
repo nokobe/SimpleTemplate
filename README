@@ -8,6 +8,16 @@ The template uses a special syntax which allows a number of constructs in the
 template so that no code needs to (or can) run in the template. Visa versa, no
 display information needs to be in the code.
 
+NOTE: by default, SimpleTemplate outputs using the htmlentities() function.
+To force htmlentities NOT to be used, add the variable using the [optional]
+third argument of zero.
+eg.
+	# will apply htmlentities whenever it appears in the template
+	$page->add('somevar', $somevar);
+
+	# will NOT apply htmlentities whenever it appears in the template
+	$page->add('somevar', $somevar, 0);
+
 Caveat emptor:
 
 SimpleTemplate is a very simple and limited implementation of StringTemplate.

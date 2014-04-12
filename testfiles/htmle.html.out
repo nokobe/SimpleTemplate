@@ -1,0 +1,13 @@
+HTML Entities test
+
+default: uses htmlentities
+
+item: hello, normal item...&lt;br /&gt; &lt;script&gt;
+
+array item: an array item...&lt;br /&gt; &lt;script&gt;
+
+Now force non-use of htmlentities
+
+item: hello, normal item...<br /> <script>
+
+array item: an array item...<br /> <script>

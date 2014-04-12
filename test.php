@@ -220,6 +220,17 @@ if ($startFrom <= $testNumber) {
 	compare($testNumber, $page->render(), 'testfiles/autoindex.html.out', 'auto index test');
 }
 
+$testNumber = 21;
+if ($startFrom <= $testNumber) {
+	$page = new SimpleTemplate('testfiles/htmle.html');
+	if ($traceFrom > 0 && $traceFrom <= $testNumber) { $page->traceOn(); }
+	$page->add('title', 'html entity test');
+	$page->add('item', 'hello, normal item...<br /> <script>');
+	$page->add('array', Array('item' => 'an array item...<br /> <script>'));
+	$page->add('neitem', 'hello, normal item...<br /> <script>', 0);
+	$page->add('nearray', Array('item' => 'an array item...<br /> <script>'), 0);
+	compare($testNumber, $page->render(), 'testfiles/htmle.html.out', 'html entity test');
+}
 
 print "done. Passed $passed of $total\n";
 

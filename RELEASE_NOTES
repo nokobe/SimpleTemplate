@@ -1,3 +1,7 @@
+Sun Apr 13, 2014 Version 0.10.0 added ability to disable htmlentities
+    - added optional parameter to add() to disable htmlentities() call
+      for that variable
+
 Sat Apr 12, 2014 Version 0.9.0 added auto index var + some fixes
    - fix: getAttr and getAttr2 should search recursive
    - fix: parse VAR and ARRAYVAR in rendertemplate now use getAttr
