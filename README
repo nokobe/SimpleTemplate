@@ -104,6 +104,8 @@ __________/ Template Constructs: \______________________________
 
 	Template inclusion mapping a var
 		to an alias			$var:template(alias)$
+
+	i1 and i0				1-base and 0-based iteration indexes
 	 
 
            _______________________________

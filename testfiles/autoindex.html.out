@@ -1,0 +1,13 @@
+1-offset autoindex test
+1 -- John is 18 years old and lives at 123 Evergreen St
+2 -- Mary is 25 years old and lives at 763 Nosey Cres
+
+
+
+z-offset autoindex test
+choices:
+	0: Don't worry
+	1: Be happy
+	2: Don't have a cow, man
+	3: Be free
+

@@ -1,0 +1,50 @@
+Title = Triple Recurse Test
+
+	<b>Triple Recurse Test</b>
+
+
+ONE - using an anonymous template
+
+	item name is John
+	item name is <b>John</b>
+
+	item age <font color="green">18</font>
+
+	item addr 123 Evergreen St
+
+	item name is Mary
+	item name is <b>Mary</b>
+
+	item age <font color="green">25</font>
+
+	item addr 763 Nosey Cres
+
+
+TWO - using a template()
+	item name is John
+	item name is <b>John</b>
+
+	item age <font color="green">18</font>
+
+	item addr 123 Evergreen St
+
+	<b>Triple Recurse Test</b>
+
+	item name is Mary
+	item name is <b>Mary</b>
+
+	item age <font color="green">25</font>
+
+	item addr 763 Nosey Cres
+
+	<b>Triple Recurse Test</b>
+
+
+
+THREE - using an arrayvar as the var
+ <font color="green">the cat for dog</font> 
+
+ cat into array gives: doh
+ cat into array gives: ray
+ cat into array gives: me
+

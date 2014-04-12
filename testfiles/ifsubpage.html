@@ -1,0 +1,20 @@
+Requires:
+	cond - boolean
+	subpage1(), subpage2() - subtemplates
+	var1, var2 - anything
+
+START SUBPAGE
+$if($cond$)$
+$subvar:subpage1(subpagevar)$
+$else$
+$subvar:subpage2(subpagevar)$
+$endif$
+END SUBPAGE
+
+START COND FOR VARS
+$if($cond$)$
+	$var1$ then $var2[$key2$]$
+$else$
+	$var2[$key2$]$ then $var1$
+$endif$
+START COND FOR VARS

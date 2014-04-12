@@ -168,6 +168,59 @@ if ($startFrom <= $testNumber) {
 	compare($testNumber, $page->render(), 'testfiles/rhash.html.out', 'complex (hash) (recursive) VAR');
 }
 
+$testNumber = 17;
+if ($startFrom <= $testNumber) {
+	$page = new SimpleTemplate('testfiles/ifsubpage.html');
+	if ($traceFrom > 0 && $traceFrom <= $testNumber) { $page->traceOn(); }
+	$page->add('cond', true);
+	$page->add('var1', '((I am var one))');
+	$key = 'xyz';
+	$vartwo[$key] = '((I am arrayvar two))';
+	$page->add('var2', $vartwo);
+	$page->add('key2', $key);
+	$page->add('subvar', '((hello from the subpage))');
+	$cat = Array();
+	compare($testNumber, $page->render(), 'testfiles/ifsubpage.html.true', 'if (true) with subpages');
+
+$testNumber = 18;
+	$page->add('cond', false);
+	compare($testNumber, $page->render(), 'testfiles/ifsubpage.html.false', 'if (false) with subpages');
+}
+
+$testNumber = 19;
+if ($startFrom <= $testNumber) {
+	$page = new SimpleTemplate('testfiles/triple_recurse.html');
+	if ($traceFrom > 0 && $traceFrom <= $testNumber) { $page->traceOn(); }
+	$page->add('title', 'Triple Recurse Test');
+	$cat['dog'] = 'the cat for dog';
+	$cat['array'] = Array('doh', 'ray', 'me');
+	$page->add('cat', $cat);
+	$rows = Array();
+	$rows[] = Array('name' => 'John', 'age' => '18', 'addr' => '123 Evergreen St' );
+	$rows[] = Array('name' => 'Mary', 'age' => '25', 'addr' => '763 Nosey Cres' );
+	$page->add('rows', $rows);
+	compare($testNumber, $page->render(), 'testfiles/triple_recurse.html.out', 'triple recurse');
+}
+
+$testNumber = 20;
+if ($startFrom <= $testNumber) {
+	$page = new SimpleTemplate('testfiles/autoindex.html');
+	if ($traceFrom > 0 && $traceFrom <= $testNumber) { $page->traceOn(); }
+	$page->add('title', 'auto index test');
+	$rows = Array();
+	$rows[] = Array('name' => 'John', 'age' => '18', 'addr' => '123 Evergreen St' );
+	$rows[] = Array('name' => 'Mary', 'age' => '25', 'addr' => '763 Nosey Cres' );
+	$choices = Array();
+	$choices[] = "Don't worry";
+	$choices[] = "Be happy";
+	$choices[] = "Don't have a cow, man";
+	$choices[] = "Be free";
+	$page->add('items', $rows);
+	$page->add('choices', $choices);
+	compare($testNumber, $page->render(), 'testfiles/autoindex.html.out', 'auto index test');
+}
+
+
 print "done. Passed $passed of $total\n";
 
 exit(0);

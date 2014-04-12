@@ -1,0 +1,26 @@
+Requires:
+	cond - boolean
+	subpage1(), subpage2() - subtemplates
+	var1, var2 - anything
+
+START SUBPAGE
+Hello. I am an alternative subpage, to be included if the
+test condition is false.
+
+requires:
+	subpagevar - var set just for the subpage
+	var1, var2 - vars set in the parent
+
+I am very similar to the first subpage.
+
+In this subpage, I have my own vars: eg. subpagevar = ((hello from the subpage))
+
+I can also reference the parent vars.
+eg. var2 = ((I am arrayvar two)) and var1 = ((I am var one))
+(my vars in the the reverse order)
+
+END SUBPAGE
+
+START COND FOR VARS
+	((I am arrayvar two)) then ((I am var one))
+START COND FOR VARS

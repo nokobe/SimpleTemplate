@@ -1,3 +1,11 @@
+Sat Apr 12, 2014 Version 0.9.0 added auto index var + some fixes
+   - fix: getAttr and getAttr2 should search recursive
+   - fix: parse VAR and ARRAYVAR in rendertemplate now use getAttr
+   - allow arrayvar in map construct. eg $var[key]:template()$
+   - allow arrayvar in anonymous template. eg $var[key]:{alias|_template_text_}
+   - added: autoindex vars i0 (zero-offset index) and i1 (1-offset index)
+   - simplified the match and replace function code
+
 Fri Apr 11, 2014 Version 0.8.0 added recursion + minor improvements
    - now handles recursive templates
    - handles $var[key]$ within if(condition)

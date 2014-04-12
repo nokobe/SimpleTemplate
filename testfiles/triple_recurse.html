@@ -1,0 +1,20 @@
+Title = $title$
+
+	$title:bold()$
+
+ONE - using an anonymous template
+$rows:{item|
+	item name is $item[name]$
+	item name is $item[name]:bold()$
+	item age $item[age]:green()$
+	item addr $item[addr]$
+}$
+
+TWO - using a template()
+$rows:itemrow(row)$
+
+THREE - using an arrayvar as the var
+$cat[dog]:{x| <font color="green">$x$</font> }$
+
+$cat[array]:{x| cat into array gives: $x$
+}$

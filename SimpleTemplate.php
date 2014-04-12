@@ -5,7 +5,7 @@ class SimpleTemplate {
 	protected $page;
 	protected $attr;
 	protected $trace = 0; # for debugging
-	public $version = "0.8.0";
+	public $version = "0.9.0";
 
 	function SimpleTemplate($file, $live = 0) {
 		if ($live) {
@@ -25,17 +25,15 @@ class SimpleTemplate {
 			if ( strcmp($parts['dirname'], $this->templateDir) != 0) {	 // same base OR... assume is relative
 				$this->templateInUse = $this->templateDir."/".$file.$this->suffix;
 
-//				$this->loadTemplate("$this->templateDir/$file$this->suffix");
 			}
 			$this->trace("template in use = ".$this->templateInUse);
-
 			$this->loadTemplate($file);
-//			$this->loadTemplate("$this->templateDir/$file.$this->suffix");
 		}
 		$this->parent = Array();
 	}
 
 	function addparent($parent) {
+		if ($parent->trace == 1) $this->traceOn();
 		$this->trace("parent added!");
 		$this->parent[] = $parent;
 	}
@@ -52,36 +50,55 @@ class SimpleTemplate {
 		return $this->renderTemplate($this->page);
 	}
 
+	// recursively check for attribute: var
 	function hasAttr($var) {
-		if ($x = isset($this->attr[$var])) { return $x; }
+		if ($x = isset($this->attr[$var]))
+		{
+			return $x;
+		}
 		foreach ($this->parent as $parent) {
-			if ($x = isset($parent->attr[$var])) { return $x; }
+			if ($x = $parent->hasAttr($var)) {
+				return $x;
+			}
 		}
 		return false;
 	}
 
+	// recursively check for attribute: var[key]
 	function hasAttr2($var, $key) {
-		return isset($this->attr[$var][$key]);
-
-		if ($x = isset($this->attr[$var][$key])) { return $x; }
+		if ($x = isset($this->attr[$var][$key])) {
+			return $x;
+		}
 		foreach ($this->parent as $parent) {
-			if ($x = isset($parent->attr[$var][$key])) { return $x; }
+			if ($x = $parent->hasAttr2($var, $key)) {
+				return $x;
+			}
 		}
 		return false;
 	}
 
+	// recursively fetch attribute: var
 	function getAttr($var) {
-		if (isset($this->attr[$var])) { return $this->attr[$var]; }
+		if (isset($this->attr[$var])) {
+			return $this->attr[$var];
+		}
 		foreach ($this->parent as $parent) {
-			if (isset($parent->attr[$var])) { return $parent->attr[$var]; }
+			if ($parent->hasAttr($var)) {
+				return $parent->getAttr($var);
+			}
 		}
 		$this->fatal("GETATTR > attr for $var not found");
 	}
 
+	// recursively fetch attribute: var[key]
 	function getAttr2($var, $key) {
-		if (isset($this->attr[$var][$key])) { return $this->attr[$var][$key]; }
+		if (isset($this->attr[$var][$key])) {
+			return $this->attr[$var][$key];
+		}
 		foreach ($this->parent as $parent) {
-			if (isset($parent->attr[$var][$key])) { return $parent->attr[$var][$key]; }
+			if ($parent->hasAttr2($var, $key)) {
+				return $parent->getAttr2($var, $key);
+			}
 		}
 		$this->fatal("GETATTR2 > attr for $var [$key] not found");
 	}
@@ -120,20 +137,11 @@ class SimpleTemplate {
 		if ($this->hasAttr($condition)) {
 			$result = $this->getAttr($condition);
 		} else if ($this->matchVar($condition, $var)) {
-#			if (! $this->hasAttr($var)) {
-#				$this->fatal("ParseCOND > VAR: no attribute for \$$var\$ in $condition");
-#			}
 			if ($this->hasAttr($var)) $result = $this->getAttr($var);
 
 		} else if ($this->matchVarKey($condition, $var, $key)) {
-#			if (! $this->hasAttr2($var, $key)) {
-#				$this->fatal("Parse COND > ARRAYVAR: no attribute found for \${$var}[$key]\$");
-#			}
 			if ($this->hasAttr2($var, $key)) $result = $this->getAttr2($var, $key);
 		}
-#		else {
-#			$result = false;
-#		}
 
 		return $reverseResult ? ! $result : $result;
 	}
@@ -191,17 +199,7 @@ class SimpleTemplate {
 		}
 	}
 
-	function parseTEMPLATE($string) {
-		$this->trace("parseTEMPLATE > checking : [[[ $string ]]]");
-		if (! preg_match('/\$([a-zA-Z0-9-_]+)\(\)\$/', $string, $matches)) {
-			$this->fatal("Parse TEMPLATE (#1) failed: couldn't find \$template()\$ in string: $string");
-		}
-		$name = $matches[1];
-		$this->trace("extracted template name as: $name");
-		return $this->renderTemplate(file_get_contents("$this->templateDir/$name.$this->suffix"));
-	}
-
-	// parse: $var:{alias|_template_}$
+	// parse: $var:{alias|_template_}$ or $var[key]:{alias|_template_}$
 	function parseLIVE($string) {
 		$this->trace("parseLIVE > checking : [[[ $string ]]]");
 		if (! preg_match('/\$([^: ]+):{([^|]+)\|([^}]+)}\$/', $string, $matches)) {
@@ -211,78 +209,46 @@ class SimpleTemplate {
 		$alias = $matches[2];
 		$templatetext = $matches[3];
 		$this->trace("var = $var\nalias = $alias\ntext = [[[ $templatetext ]]]");
-		if (! isset($this->attr[$var])) {
-			$this->fatal("Parse LIVE (#2): attribute \"$var\" not set. Expected array");
+
+		$result = '';
+		// check if we have a $var$ or a $var[key]$...
+		if (preg_match('/([a-zA-Z0-9-_]+)\[([^\]]+)\]/', $var, $found)) {
+			$value = $this->getAttr2($found[1], $found[2]);
+			$this->trace("TRACE1");
+		} else {
+			$value = $this->getAttr($var);
+			$this->trace("TRACE2");
 		}
-
-#		if (! is_array($this->attr[$var])) {
-#			$this->fatal("Parse LIVE (#4): \"$var\" is not an array in template string: $string");
-#		}
-
-		$r = '';
-		if (is_array($this->attr[$var])) {
-			foreach ($this->attr[$var] as $attr) {
+		if (is_array($value)) {
+			$autoindex = 0;
+			foreach ($value as $attr) {
 				$subpage = new SimpleTemplate($templatetext, 1);
-				$subpage->add($alias, $attr);
 				$subpage->addparent($this);
+				$subpage->add('i0', $autoindex);
+				$subpage->add('i1', $autoindex + 1);
+				$subpage->add($alias, $attr);
 
-				// this is an anonymous template, but we still want to preserve these settings
+				// carry these settings into the subpage
 				$subpage->templateDir = $this->templateDir;
 				$subpage->suffix = $this->suffix;
 
-				$r .= $subpage->render();
-	//			if (is_array($attr)) {
-	//				$templ = $text;
-	//				foreach ($attr as $subkey => $subvalue) {
-	//					$templ = str_replace("\$$alias"."[$subkey]\$", htmlentities($subvalue), $templ);
-	//				}
-	//				$r .= $templ;
-	//			} else {
-	////					$r .= str_replace("\$$alias\$", htmlentities($attr), $text, $count);
-	//				$r .= str_replace("\$$alias\$", htmlentities($attr), $text, $count);
-	//			}
+				$result .= $subpage->render();
+
+				$autoindex ++;
 			}
 		} else {
 			$subpage = new SimpleTemplate($templatetext, 1);
-			$subpage->add($alias, $this->attr[$var]);
 			$subpage->addparent($this);
+			$subpage->add($alias, $value);
 
-			// this is an anonymous template, but we still want to preserve these settings
+			// carry these settings into the subpage
 			$subpage->templateDir = $this->templateDir;
 			$subpage->suffix = $this->suffix;
 
-			$r .= $subpage->render();
+			$result .= $subpage->render();
 		}
-		return $r;
+		return $result;
 	} // end parseLIVE()
-
-	// parse: $var:template_file(alias)$
-	function parseMAP($string) {
-		$this->trace("parseMAP > checking : [[[ $string ]]]");
-		if (! preg_match('/\$([a-zA-Z0-9-_]+):([a-zA-Z0-9-_]+)\(([^)]*)\)\$/', $string, $matches)) {
-			$this->fatal("Parse MAP (#1) failed: couldn't find \$var:sub_template()\$ in string: $string");
-		}
-		$var = $matches[1];
-		$template = $matches[2];
-		$alias = $matches[3] == "" ? 'attr' : "$matches[3]";
-
-		$this->trace("var = $var\ntemplate = $template\nalias = $alias");
-		$text = file_get_contents("$this->templateDir/$template.$this->suffix");
-		return $this->parseLIVE("\$$var:".'{'."$alias|$text".'}'."\$");
-	}
-
-	# this function deprecated after version 0.6
-	function parseVAR($string) {
-		$this->trace("checking : [[[ $string ]]]");
-		if (! preg_match('/\$([a-zA-Z0-9-Z]+)\$/', $string, $matches)) {
-			$this->fatal("Parse VAR (#1) failed: couldn't find \$var\$ in string: $string");
-		}
-		$var = $matches[1];
-		if (!isset($this->attr[$var])) {
-			$this->fatal("Parse VAR (#2): missing attribute for \"$var\"");
-		}
-		return $this->attr[$var];
-	}
 
 	function matchAndReplaceIF($string) {
 		// $if(cond)$ ... [$else$] ... $endif$
@@ -303,70 +269,95 @@ class SimpleTemplate {
 		return $string;
 	}
 
-	function renderTemplate($string) {
-		global $x, $y;
-
-		if (count($this->parent) > 0) {
-			$this->trace("rendering THIS: $string");
-			$this->trace("using these: ".print_r($this->attr, 1));
-			$this->trace("and these: ".print_r($this->parent[0]->attr, 1));
-		}
-
-		$anonymousTemplates = $this->maskAnonymousTemplates($string);
-
-		$string = $this->matchAndReplaceIF($string);
-
-		// $var$
+	#
+	# search and replace instances of
+	# 	$var$
+	#
+	function matchAndReplaceVAR($string) {
 		$this->trace("\n\nchecking for VAR");
 		if (preg_match_all('/\$([a-zA-Z0-9-_]+)\$/', $string, $matches, PREG_SET_ORDER) > 0) {
 			foreach ($matches as $found) {
 				$var = $found[1];
 				$this->trace("found \$var$ == $var");
-				if (!isset($this->attr[$var])) {
+				if (!$this->hasAttr($var)) {
 					$this->fatal("Parse VAR: no attribute for \$$var\$");
 				}
-				$this->trace("and it's set to : ".print_r($this->attr[$var], 1));
-				$string = str_replace($found[0], htmlentities($this->attr[$var]), $string);
+				$value = $this->getAttr($var);
+				$this->trace("and it's set to : $value");
+				$string = str_replace($found[0], htmlentities($value), $string);
 			}
 		}
+		return $string;
+	}
+
+	#
+	# search and replace instances of
+	# 	$var[key]$
+	#
+	function matchAndReplaceARRAYVAR($string) {
 		// $var[key]$
 		$this->trace("\n\nchecking for ARRAY VAR");
 		if (preg_match_all('/\$([a-zA-Z0-9-_]+)\[([^\]]+)\]\$/', $string, $matches, PREG_SET_ORDER) > 0) {
 			foreach ($matches as $found) {
 				$var = $found[1];
 				$idx = $found[2];
-				if (! isset($this->attr[$var][$idx])) {
+				if (! $this->hasAttr2($var, $idx)) {
 					$this->fatal("Parse ARRAYVAR: no attribute found for \${$var}[$idx]\$");
 				}
-				$string = str_replace($found[0], htmlentities($this->attr[$var][$idx]), $string);
+				$value = $this->getAttr2($var, $idx);
+				$string = str_replace($found[0], htmlentities($value), $string);
 			}
 		}
+		return $string;
+	}
 
-		// $templatefile()$
+	#
+	# search and replace instances of
+	#	$templatefile()$
+	#
+	function matchAndReplaceTEMPLATE($string) {
 		$this->trace("\n\nchecking for TEMPLATE");
-		if (preg_match_all('/\$[a-zA-Z0-9-_]+\(\)\$(\n|$)?/', $string, $matches) > 0) {
-			foreach ($matches[0] as $found) {
-				$trimmed = trim($found);
-				$this->trace("found \$template()$ == [$found]");
-				$this->trace("found trimmed \$template()$ == [$trimmed]");
-				$string = str_replace($found, $this->parseTEMPLATE($trimmed), $string);
+		if (preg_match_all('/\$([a-zA-Z0-9-_]+)\(\)\$(\n|$)?/', $string, $matches, PREG_SET_ORDER) > 0) {
+			foreach ($matches as $match) {
+				$found = $match[0];
+				$templatefile = $match[1];
+				$this->trace("found \$template()\$ => $templatefile()");
+				$templatetext = file_get_contents("$this->templateDir/$templatefile.$this->suffix");
+				$render = $this->renderTemplate($templatetext);
+				$string = str_replace($found, $render, $string);
 			}
 		}
+		return $string;
+	}
 
-		// $var:template()$
+	#
+	# search and replace instances of
+	#	$var:template(alias)$ and/or $var[key]:template(alias)$
+	#
+	function matchAndReplaceMAP($string) {
 		$this->trace("\n\nchecking for MAP");
-		if (preg_match_all('/\$[a-zA-Z0-9-_]+:[a-zA-Z0-9-_]+\([^)]*\)\$/', $string, $matches) > 0) {
-			foreach ($matches[0] as $found) {
-				$this->trace("found \$map template$ == $found");
-				$string = str_replace($found, $this->parseMAP($found), $string);
+		if (preg_match_all('/\$([a-zA-Z0-9-_\[\]]+):([a-zA-Z0-9-_]+)\(([^)]*)\)\$/', $string, $matches, PREG_SET_ORDER) > 0) {
+			foreach ($matches as $match) {
+				$found = $match[0];
+				$var = $match[1];
+				$template = $match[2];
+				$alias = $match[3] == "" ? 'attr' : "$match[3]";
+				$this->trace("matchAndReplaceMAP:: var = $var\ntemplate = $template\nalias = $alias");
+				$templatetext = file_get_contents("$this->templateDir/$template.$this->suffix");
+				$render = $this->parseLIVE("\$$var:".'{'."$alias|$templatetext".'}'."\$");
+				$string = str_replace($found, $render, $string);
 			}
 		}
+		return $string;
+	}
 
-		$string = $this->restoreAnonymousTemplates($string, $anonymousTemplates);
-
-		// $var:{alias|anonymous template}$
+	#
+	# search and replace instances of
+	#	$var:{alias|anonymous template}$
+	#
+	function matchAndReplaceANONYMOUSTEMPLATE($string) {
 		$this->trace("\n\nchecking for LIVE TEMPLATE");
-		if (preg_match_all('/\$[a-zA-Z0-9-_]+:{[^}]+}\$/', $string, $matches) > 0) {
+		if (preg_match_all('/\$[a-zA-Z0-9-_\[\]]+:{[^}]+}\$/', $string, $matches) > 0) {
 			foreach ($matches[0] as $found) {
 				$this->trace("found \$live template$ == $found");
 				$string = str_replace($found, $this->parseLIVE($found), $string);
@@ -375,12 +366,37 @@ class SimpleTemplate {
 		return $string;
 	}
 
+	function renderTemplate($string) {
+		global $x, $y;
+
+		if (count($this->parent) > 0) {
+			$this->trace("rendering THIS: $string");
+			$this->trace("using these: ".print_r($this->attr, 1));
+			$this->trace("and these from the parent: ".print_r($this->parent[0]->attr, 1));
+			// and the parents parents, etc.
+		}
+
+		$anonymousTemplates = $this->maskAnonymousTemplates($string);
+
+		$string = $this->matchAndReplaceIF($string);
+		$string = $this->matchAndReplaceVAR($string);
+		$string = $this->matchAndReplaceARRAYVAR($string);
+		$string = $this->matchAndReplaceTEMPLATE($string);
+		$string = $this->matchAndReplaceMAP($string);
+
+		$string = $this->restoreAnonymousTemplates($string, $anonymousTemplates);
+
+		$string = $this->matchAndReplaceANONYMOUSTEMPLATE($string);
+
+		return $string;
+	}
+
 	# @param string(reference) - template text
 	# @return array - array of anonymous templates stripped from template text
 	function maskAnonymousTemplates(&$string) {
 		$anonymousTemplates = Array();
 		$maskCount = 0;
-		while (preg_match('/\$[a-zA-Z0-9-_]+:{[^}]+}\$/', $string, $match) > 0) {
+		while (preg_match('/\$[a-zA-Z0-9-_\[\]]+:{[^}]+}\$/', $string, $match) > 0) {
 			$anonymousTemplates[] = $match[0];
 			$maskCount ++;
 			$mask = "MASK6238973498.$maskCount";
